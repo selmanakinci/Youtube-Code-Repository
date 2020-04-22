@@ -16,11 +16,11 @@ class GenericNetwork(nn.Module):
         self.fc3 = nn.Linear(self.fc2_dims, n_actions)
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
-        self.to(self.device)
+        #self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
+        #self.to(self.device)
 
     def forward(self, observation):
-        state = T.Tensor(observation).to(self.device)
+        state = T.Tensor(observation) #.to(self.device)
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
@@ -40,11 +40,11 @@ class ActorCriticNetwork(nn.Module):
         self.v = nn.Linear(self.fc2_dims, 1)
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
-        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
-        self.to(self.device)
+        #self.device = T.device('cuda:0' if T.cuda.is_available() else 'cuda:1')
+        #self.to(self.device)
 
     def forward(self, observation):
-        state = T.Tensor(observation).to(self.device)
+        state = T.Tensor(observation) #.to(self.device)
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
         pi = self.pi(x)
@@ -65,7 +65,7 @@ class Agent(object):
         self.log_probs = None
 
     def choose_action(self, observation):
-        probabilities = F.softmax(self.actor.forward(observation))
+        probabilities = F.softmax(self.actor.forward(observation), dim=0)
         action_probs = T.distributions.Categorical(probabilities)
         action = action_probs.sample()
         self.log_probs = action_probs.log_prob(action)
@@ -78,7 +78,7 @@ class Agent(object):
 
         critic_value_ = self.critic.forward(new_state)
         critic_value = self.critic.forward(state)
-        reward = T.tensor(reward, dtype=T.float).to(self.actor.device)
+        reward = T.tensor(reward, dtype=T.float)#.to(self.actor.device)
 
         delta = reward + self.gamma*critic_value_*(1-int(done)) - critic_value
 
@@ -118,7 +118,7 @@ class NewAgent(object):
 
         _, critic_value_ = self.actor_critic.forward(new_state)
         _, critic_value = self.actor_critic.forward(state)
-        reward = T.tensor(reward, dtype=T.float).to(self.actor_critic.device)
+        reward = T.tensor(reward, dtype=T.float)#.to(self.actor_critic.device)
 
         delta = reward + self.gamma*critic_value_*(1-int(done)) - critic_value
 
